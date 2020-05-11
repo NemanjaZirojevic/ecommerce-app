@@ -1,0 +1,104 @@
+.navbar {
+    position: fixed;
+    width: 100%;
+    height: 75px;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    z-index: 100;
+    margin-top: -10px;
+    font-family: 'Dancing Script', cursive;
+    top: 0
+}
+
+.logo {
+
+    margin: 10px;
+    padding: 10px;
+}
+.shopping-cart-close {
+    text-align: end;
+    color: black;
+    margin: 5px;
+    font-size: 30px;
+}
+
+.shopping-cart-close:hover{
+    cursor: pointer;
+    color: green;
+}
+.logout {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 10px;
+    padding: 10px;
+}
+
+.nav-logo {
+    display: flex;
+}
+
+.info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 150px;
+    overflow-y: scroll;
+    background-color: #909090;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .3s ease;
+    margin-top: 80px;
+}
+
+img:hover {
+    cursor: pointer;
+
+}
+
+.navitems {
+    list-style-type: none;
+    float: left;
+    width: 100%;
+
+}
+
+.navitems a {
+    font-weight: bold;
+}
+
+.navitems li {
+    display: inline-flex;
+    margin: 10px;
+
+}
+
+.navitems li > a {
+    text-decoration: none;
+    color: #fff;
+
+}
+
+.navitems li a:hover {
+    color: green;
+    cursor: pointer;
+}
+
+.active {
+    color: green;
+}
+
+a.active:hover {
+    color: white;
+}
+
+#shoppingCard {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 20px;
+}

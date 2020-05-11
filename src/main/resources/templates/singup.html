@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/Login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+</head>
+<body style="align-items: center;text-align: center">
+<form class="login" th:object="${user}" th:action="@{register}" th:method="post">
+    <div>
+        <h4>Registration</h4>
+    </div>
+    <div class="login-fields">
+        <div class="content">
+            <label for="userEmail">Enter email :</label>
+            <input type="text" name="userEmail" id="userEmail" >
+            <span class="error-message" th:if="${#fields.hasErrors('userEmail')}"
+                  th:errors="*{userEmail}">Email is required</span>
+        </div>
+        <div class="content">
+            <label for="userPassword">Enter password: </label>
+            <input id="userPassword" name="userPassword" type="text">
+            <span class="error-message" th:if="${#fields.hasErrors('userPassword')}"
+                  th:errors="*{userPassword}">Password is required</span>
+        </div>
+        <!--<div class="content">-->
+            <!--<label for="userPassword">Confirm password: </label>-->
+            <!--<input id="userPassword" type="userPassword" required>-->
+        <!--</div>-->
+        <div class="content">
+            <label for="userPhone">Enter phone number : </label>
+            <input id="userPhone" type="text" name="userPhone">
+            <span class="error-message" th:if="${#fields.hasErrors('userPhone')}"
+            th:errors="*{userPhone}">Phone number is required</span>
+        </div>
+        <div class="content">
+            <label for="userAddress">Enter address: </label>
+            <input id="userAddress" type="text" name="userAddress" >
+        </div>
+    </div>
+    <button class="login-btn">Sing up</button>
+</form>
+</body>
+</html>

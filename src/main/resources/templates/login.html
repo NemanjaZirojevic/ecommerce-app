@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/Login.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+</head>
+<body style="align-items: center;text-align: center">
+<form class="login" th:action="@{login}" th:method="post">
+    <div>
+        <h4>Please login</h4>
+    </div>
+    <div class="login-fields">
+        <div class="content">
+            <label for="username">Enter email :</label>
+            <input type="text" name="username">
+        </div>
+        <div class="content">
+            <label for="password">Enter password: </label>
+            <input id="password" type="password" name="password">
+        </div>
+        <div th:if="${param.error}" style="color: red">Wrong username/password, please try again</div>
+    </div>
+    <button class="login-btn">Log in</button>
+    <hr>
+    <div>
+        <label>Or login with : </label>
+        <div class="login-social-networks">
+            <a th:href="@{/facebooklogin}"><img th:src="@{icons/facebook.png}" alt="Login with facebook"/></a>
+            <a th:href="@{/facebooklogin}"><img th:src="@{icons/google.png}" alt="Login with google"/></a>
+            <a th:href="@{/facebooklogin}"><img th:src="@{icons/linkedin.png}" alt="Login with linkedin"/></a>
+        </div>
+    </div>
+    <div class="delimiter"></div>
+    <div class="singup">
+        <span>Don't have account? Sing up <a th:href="@{singup}">here</a></span>
+    </div>
+</form>
+<script>
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = function () {
+        window.history.pushState(null, "", window.location.href);
+    };
+</script>
+</body>
+</html>

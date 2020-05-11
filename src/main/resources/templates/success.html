@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Success</title>
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Navbar.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Main.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Spinner.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Success.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<nav th:insert="fragments/navbar :: navbar"></nav>
+<div id="cover-spin"></div>
+<body>
+<div class="container">
+    <div class="message-title">
+        <h2>Success!</h2>
+    </div>
+    <div class="message-image">
+        <div class="imgwrap">
+            <img th:src="@{../icons/approved.png}">
+        </div>
+    </div>
+    <div class="message-body">
+        <h1>Your order has been successfully purchased!</h1>
+        <p>Check your email for details</p>
+    </div>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+        crossorigin="anonymous"></script>
+</body>
+</html>

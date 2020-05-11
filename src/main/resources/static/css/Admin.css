@@ -1,0 +1,91 @@
+body {
+    margin: auto;
+}
+
+.category {
+    display: flex;
+    flex-direction: column;
+    border:1px solid black;
+    flex-wrap: wrap;
+    background-color: #e0e0e0;
+    font-family: 'Dancing Script', cursive;
+    width: 100%;
+    align-items: center;
+    padding: 20px;
+
+}
+#shoppingCartItem {
+    display: none !important;
+}
+
+#shoppingCartItems {
+    display: none !important;
+}
+
+.add-btn{
+    width: 30%;
+    margin: auto;
+}
+
+.side-bar {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content:normal;
+    font-family: 'Dancing Script', cursive;
+    flex-grow: 2;
+}
+
+.side-bar-item{
+    text-align: center;
+    color: white;
+    margin: 10px;
+    flex-grow: 1;
+}
+
+.main-content{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 900px;
+    max-width: 100%;
+    margin: auto;
+    margin-top: 130px;
+}
+.category-item{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: column;
+    padding: 10px;
+    width: 50%;
+}
+
+.confirm-btn {
+    width: 75px;
+    height: 40px;
+    background-color: transparent;
+    border:1px solid gray;
+}
+
+/*.content-forms {*/
+    /*display: flex;*/
+    /*justify-content: center;*/
+    /*flex-wrap: wrap;*/
+    /*flex-grow: 8;*/
+/*}*/
+
+.content-forms {
+    display: flex;
+    justify-content: center;
+    width: 700px;
+    margin: auto;
+    flex-wrap: wrap;
+    flex-grow: 7;
+}
+
+
+
+.confirm-btn:hover{
+    background-color: greenyellow;
+}

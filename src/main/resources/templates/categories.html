@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Navbar.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Admin.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Spinner.css}">
+</head>
+<nav th:replace="fragments/navbar::navbar"></nav>
+<body>
+<nav th:replace="fragments/navbar::navbar"></nav>
+<div class="main-content">
+    <div class="side-bar">
+        <div class="side-bar-item">
+            <a href="#" id="productAdmin">Add new product</a>
+        </div>
+        <div class="side-bar-item">
+            <a href="#" id="categoryAdmin">Search products</a>
+        </div>
+    </div>
+    <div class="content-forms">
+        <div class="category">
+            <div class="category-item"><h4> Product categories administration </h4></div>
+            <div class="category-item"><label for="category_name">Enter category name : </label>
+                <input type="text"
+                       name="category_name"
+                       th:id="category_name">
+            </div>
+            <div class="category-item">
+                <button id="add_category">ADD CATEGORY</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+        crossorigin="anonymous"></script>
+<script>
+    $("#add_category").click(function () {
+        const newCategoryName = $("#category_name").val();
+        var category = {};
+        category.categoryName = newCategoryName;
+        console.log(newCategoryName);
+        $.ajax({
+            url: 'add',
+            contentType: "application/json",
+            type: 'POST',
+            dataType: "json",
+            beforeSend: function (xhr, settings) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                xhr.setRequestHeader(header, token);
+                $('#cover-spin').show();
+            },
+            data: JSON.stringify(category),
+            success: function (response) {
+                console.log(response);
+                $('#cover-spin').hide();
+                $('#category_name').val('');
+            },
+            error: function (response) {
+                console.log(response);
+                $('#cover-spin').hide();
+            }
+        });
+    });
+</script>
+</body>
+</html>

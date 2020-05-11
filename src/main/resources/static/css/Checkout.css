@@ -1,0 +1,71 @@
+#customers {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    color: black;
+    width: 100%;
+}
+
+#customers td, #customers th {
+    border: 1px solid grey;
+    padding: 8px;
+    margin: auto;
+}
+
+#shoppingCartItem {
+    display: none !important;
+}
+
+#shoppingCartItems {
+    display: none !important;
+}
+
+
+#customers tr:nth-child(even){background-color: #f2f2f2 !important;}
+
+#customers tr:hover {
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+#customers th {
+    padding-top: 12px !important;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50 !important;
+    color: rgba(255, 255, 255, 0.69) !important;
+    margin: auto;
+}
+
+.remove {
+    margin: auto;
+    background: red;
+    color:white;
+    border-radius: 5px;
+}
+
+.checkout {
+    color: black;
+    margin: auto;
+    font-size: 30px;
+    font-family: 'Dancing Script', cursive;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    width: 80%;
+    margin-top: 75px;
+}
+
+.img {
+    max-width: 100px;
+    max-height: 80px;
+}
+
+.error{
+    display: block;
+    color: red;
+    font-weight: bold;
+}

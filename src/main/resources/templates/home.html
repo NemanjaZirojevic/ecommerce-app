@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Welcome</title>
+    <link rel="stylesheet" type="text/css" th:href="@{css/Navbar.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/Main.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/ShoppingCart.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/Spinner.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/Modal.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<nav th:insert="fragments/navbar :: navbar"></nav>
+<body>
+<div id="cover-spin"></div>
+
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <div class="modal-title">
+            <span class="close">&times</span>
+            <h3>Shopping card empty!</h3>
+        </div>
+        <div class="modal-body">
+            <p>Please, add some items to shopping card,then proceed checkout</p>
+        </div>
+        <div class="modal-button">
+            <button class=".modal-button">OK</button>
+        </div>
+    </div>
+</div>
+
+<section>
+    <div class="filters">
+        <div class="filter-option">
+            <label>Choose category : </label>
+            <select id="categories">
+            </select>
+        </div>
+
+        <div class="filter-option">
+            <label>Filter by price : </label>
+            <select>
+                <option value="1">Ascending</option>
+                <option value="2">Descending</option>
+            </select>
+        </div>
+        <div class="filter-option">
+            <label>Display items per page : </label>
+            <select id="displayItemsPerPage">
+                <option value="6" selected>6</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+        <div class="filter-option">
+            <button id="applyFilterBtn">Apply filters</button>
+        </div>
+    </div>
+    <div class="flex">
+        <div class="no-products">No available products</div>
+    </div>
+    <form id="checkoutForm" th:action="@{orders/create}" th:method="POST" style="display: none">
+        <input type="text" name="orders" id="ordersEl">
+    </form>
+</section>
+<script
+        src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+        crossorigin="anonymous"></script>
+<script
+        src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+        integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+        crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        fetchCategoriesList();
+        fetchProductsList(-1, 0, 6);
+        $("#shoppingCard").val(0);
+    });
+
+    var modal = document.getElementById("modal");
+    var shoppingCard = document.getElementById("shoppingCardItems");
+
+    var orders = [];
+
+    $("#applyFilterBtn").click(function () {
+        const categoryId = $("#categories").val();
+        const pageSize = $("#displayItemsPerPage").val();
+        fetchProductsList(categoryId,0, pageSize);
+
+    });
+
+    function displayPagination(currentPageNo,totalPageNo) {
+        for (var i = 1; i <= totalPageNo; i++) {
+            if(i==currentPageNo+1) {
+                $(".pagination").append('<div class="pagination-item active-item">' + i + '</div>');
+            }else{
+                $(".pagination").append('<div class="pagination-item">' + i + '</div>');
+            }
+        }
+    }
+
+    function displayProducts(productsArray, currentPageNo,totalPageNo) {
+        $(".flex").empty();
+        const products = $.map(productsArray, function (element, index) {
+            return "<form class='col'> " +
+                "<a href='#'> <img src=" + element.productImage + " width='' height='' alt='Some sample words'>" +
+                " </a> <h2>" + element.productName + "</h2> <p>" + element.productPrice + "</p> " +
+                "<input type='hidden' value=" + element.productId + " name='productIdForm' >" +
+                "<input type='hidden' value=" + element.productImage + " name='productImageForm' >" +
+                "<input type='hidden' value=" + element.productName + " name='productNameForm'>" +
+                "<input type='hidden' value=" + element.productPrice + " name='productPriceForm'>" +
+                "<button class='btn'>Read more</button><button type='button' class='btn' style='background: green' onclick='addProduct(event,this.form)' >Add</button>" +
+                "</form>";
+        }).join(" ");
+        $(".flex").append(products);
+        $(".flex").append('<div class="pagination" onclick="displayPage(event)"></div>');
+        displayPagination(currentPageNo,totalPageNo);
+    }
+
+    function displayPage(event) {
+        const pageNo = parseInt(event.target.innerHTML) -1;
+        const categoryId = $("#categories").val();
+        const pageSize = $("#displayItemsPerPage").val();
+        fetchProductsList(categoryId, pageNo, pageSize);
+
+    }
+
+    function fetchProductsList(categoryId, pageNo, pageSize) {
+
+        var url = '/products/' + categoryId;
+
+        $.ajax({
+            url: url + '?pageNo=' + pageNo + "&pageSize=" + pageSize + "&sortBy=productPrice",
+            type: 'GET',
+            contentType: 'application/json',
+            beforeSend: function (xhr, settings) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                xhr.setRequestHeader(header, token);
+                $('#cover-spin').show();
+            },
+            success: function (response) {
+                $('#cover-spin').hide();
+                console.log("products" + response.products);
+                console.log("total pages : " + response.totalPagesNo);
+                displayProducts(response.products,pageNo,response.totalPagesNo);
+            },
+            error: function (response) {
+                $('#cover-spin').hide();
+            }
+        })
+    }
+
+    function fetchCategoriesList() {
+        $('#categories').empty();
+        $.ajax({
+            url: '/categories/all',
+            type: 'GET',
+            contentType: 'application/json',
+            beforeSend: function (xhr, settings) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                xhr.setRequestHeader(header, token);
+                $('#cover-spin').show();
+            },
+            success: function (categoryItems) {
+                $('#cover-spin').hide();
+                $('#categories').append($('<option>', {
+                    value: -1,
+                    text: 'All products'
+                }));
+
+                $.each(categoryItems, function (i, item) {
+                    $('#categories').append($('<option>', {
+                        value: item.categoryId,
+                        text: item.categoryName
+                    }));
+                });
+
+            },
+            error: function (response) {
+                $('#cover-spin').hide();
+            }
+        })
+    }
+
+    function updateTotalPrice(productPrice) {
+        var total = parseFloat($("#total").val());
+        total += parseFloat(productPrice);
+        $("#total").val(total);
+        return total;
+    }
+
+    function increaseTotalItems() {
+        var totalItems = parseInt($("#shoppingCard").val());
+        totalItems += 1;
+        $("#shoppingCard").val(totalItems);
+        $('#shoppingCard')
+            .html($.trim($(this).text()))
+            .effect('highlight', {color: "#669966"}, 500);
+
+    }
+
+    function decreaseTotalItems() {
+        var totalItems = parseInt($("#shoppingCard").val());
+        totalItems -= 1;
+        $("#shoppingCard").val(totalItems);
+        $('#shoppingCard')
+            .html($.trim($(this).text()))
+            .effect('highlight', {color: "#B22222"}, 500);
+    }
+
+
+    function getProductIndex(productId) {
+        var elIndex = -1;
+        orders.forEach(function (element, index) {
+            if (element.productId == productId) {
+                elIndex = index;
+            }
+        });
+        return elIndex;
+    }
+
+    function updateProductQuantity(productId, quantity) {
+        var index = getProductIndex(productId);
+        var order = orders[index];
+        order.orderDetailsToSet[0].detailQuantity = parseInt(quantity);
+        order.productQuantity = quantity + 1;
+        orders[index] = order;
+    }
+
+
+    function addProduct(event, form) {
+
+        event.preventDefault();
+
+        const productId = $(form).find("[name=productIdForm]").val();
+        const productImage = $(form).find("[name=productImageForm]").val();
+        const productName = $(form).find("[name=productNameForm]").val();
+        const productPrice = $(form).find("[name=productPriceForm]").val();
+
+
+        increaseTotalItems();
+
+        var total = updateTotalPrice(productPrice);
+        var shoppingCardItems = $("#shoppingCardItems");
+        var articlePresent = false;
+
+
+        $("input[id='productId']").each(function (i, el) {
+            if (el.value == productId) {
+                articlePresent = true;
+                return;
+            }
+        });
+
+
+        if (articlePresent) {
+
+            var input = $('input[value=' + productId + ']');
+            const quantity = parseInt(input[0].nextElementSibling.value);
+            input[0].nextElementSibling.value = quantity + 1;
+            updateProductQuantity(productId, parseInt(quantity + 1));
+
+
+        } else {
+
+            var order = {};
+            var orderDetail = {};
+            order.productId = parseInt(productId);
+            order.productName = productName;
+            order.productImage = productImage;
+            order.productPrice = productPrice;
+            order.orderDetailsToSet = [];
+            order.productQuantity = 1;
+            orderDetail.detailQuantity = 1;
+            orderDetail.detailProductId = {};
+            orderDetail.detailProductId.productId = parseInt(productId);
+            orderDetail.detailName = productName;
+            order.orderDetailsToSet.push(orderDetail);
+            orders.push(order);
+
+            shoppingCardItems.append(' \
+            <form class="item" id="productItem">\
+            <div class="image">\
+            <img style="max-width: 100px;max-height: 80px" src="' + productImage + '" alt="" />\
+            </div>\
+            <div class="description">\
+            <span style="color: black;font-size: 20px">' + productName + '</span>\
+        </div>\
+        <div class="quantity">\
+            <button class="plus-btn" type="button" name="button" onclick="increase(this.form.productId.value,this.form.productPrice.value,this.form.quantity.value,this.form)">\
+            <img src="../icons/plus.png" alt="" />\
+            </button>\
+            <input type="hidden" id="productId" value="' + productId + '">\
+            <input id="quantity" type="text" name="name" value="1">\
+            <button class="minus-btn" type="button" name="button" onclick="decrease(this.form.productId.value,this.form.productPrice.value,this.form.quantity.value,this.form)">\
+            <img src="../icons/minus.png" alt="" />\
+            </button>\
+            </div>\
+            <input type="hidden" id="productPrice" value="' + productPrice + '">\
+            <div class="product-price">' + productPrice + '</div>\
+            </form>');
+
+        }
+
+        $('.total-coast').remove();
+        $('.checkout').remove();
+        shoppingCardItems.append('<div class="total-coast"><span>Total : </span><span id="totalValue">' + total + '</span></div>');
+        shoppingCardItems.append('<div class="checkout"><button id="checkout" onclick="checkout()">Checkout</button></div>');
+
+    };
+
+    $("#cardPreview").click(function () {
+        var totalItems = parseInt($("#shoppingCard").val());
+        if ($("#shoppingCardItems").css("opacity") == '1') {
+            $("#shoppingCardItems").css("opacity", '0');
+        } else {
+            $("#shoppingCardItems").css("opacity", '1');
+            if (totalItems == 0) {
+                $("#shoppingCardItems").css("opacity", '1');
+                $("#emptyShoppingCardTxt").css("display", "block");
+            } else {
+                $("#emptyShoppingCardTxt").css("display", "none");
+            }
+        }
+    });
+
+
+    function checkout() {
+        const totalItems = parseInt($('#shoppingCard').val());
+        if (totalItems > 0) {
+            var form = document.getElementById('checkoutForm');
+            var inputElement = document.getElementById("ordersEl");
+            inputElement.value = JSON.stringify(orders);
+            form.submit();
+        } else {
+            $('.modal').css('display', 'block');
+        }
+    };
+
+
+    function decrease(productId, productPrice, quantity, form) {
+        var total = parseFloat($("#total").val());
+        decreaseTotalItems();
+        if (total - parseInt(productPrice) >= 0) {
+            form.quantity.value = parseInt(quantity) - 1;
+            var total = updateTotalPrice(-parseInt(productPrice));
+            $("#totalValue").text(total);
+        }
+        if (parseInt(quantity) - 1 == 0) {
+            form.remove();
+        }
+        updateProductQuantity(productId, parseInt(quantity));
+
+    };
+
+    function increase(productId, productPrice, quantity, form) {
+        form.quantity.value = parseInt(quantity) + 1;
+        var total = updateTotalPrice(parseInt(productPrice));
+        $("#totalValue").text(total);
+        increaseTotalItems();
+        updateProductQuantity(productId, parseInt(quantity));
+
+    };
+
+    $(window).on('popstate', function (e) {
+        var state = e.originalEvent.state;
+        if (state !== null) {
+            window.location = '/home';
+        }
+    });
+
+    $('.close').on('click', function (event) {
+        $('.modal').css('display', 'none');
+        $("#shoppingCardItems").css("opacity", '0');
+    });
+
+    $('.modal-button').on('click', function () {
+        $('.modal').css('display', 'none');
+        $("#shoppingCardItems").css("opacity", '0');
+    });
+
+    $('.shopping-cart-close').on('click', function () {
+        $("#shoppingCardItems").css("opacity", '0');
+    });
+
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

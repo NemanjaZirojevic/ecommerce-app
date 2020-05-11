@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Navbar.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Admin.css}">
+</head>
+<nav th:replace="fragments/navbar::navbar"></nav>
+<body>
+<div id="cover-spin"></div>
+<div class="main-content">
+    <div class="side-bar">
+        <div class="side-bar-item">
+            <a href="#" id="productAdmin">Add new product</a>
+        </div>
+        <div class="side-bar-item">
+            <a href="#" id="categoryAdmin">Search products</a>
+        </div>
+    </div>
+    <div class="content-forms">
+        <div class="category">
+            <div class="category-item"><h4> Product administration </h4></div>
+            <div class="category-item"><label for="product_name">Enter product name : </label> <input type="text"
+                                                                                                      name="product_name"
+                                                                                                      th:id="product_name"
+                                                                                                      id="product_name">
+            </div>
+            <div class="category-item"><label for="product_desc">Enter product description : </label> <input type="text"
+                                                                                                             name="product_desc"
+                                                                                                             th:id="product_desc"
+                                                                                                             id="product_desc">
+            </div>
+            <div class="category-item"><label for="product_price">Enter product price : </label> <input type="text"
+                                                                                                        name="product_price"
+                                                                                                        th:id="product_price"
+                                                                                                        id="product_price">
+            </div>
+            <div class="category-item"><label for="product_image">Browse product image : </label> <input type="text"
+                                                                                                         name="product_image"
+                                                                                                         th:id="product_image"
+                                                                                                         id="product_image">
+            </div>
+            <div class="category-item">
+                <label>Choose category : </label>
+                <select id="category">
+                    <option value="8">Mobile phone</option>
+                    <option value="2">Laptop</option>
+                    <option value="3">Desktop computer</option>
+                    <option value="4">Equipment</option>
+                </select></div>
+            <div class="category-item">
+                <button id="add_product" class="add-btn">ADD PRODUCT</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+        crossorigin="anonymous"></script>
+
+<script>
+
+    $(document).ready(function(){
+
+        fetchCategoriesList();
+
+    });
+
+    function clearInputFileds(){
+        $("#product_name").val('');
+        $("#product_price").val('');
+        $("#product_desc").val('');
+        $("#product_image").val('');
+        $("#category").val('');
+    }
+
+
+    function fetchCategoriesList() {
+        $('#category').empty();
+
+        $.ajax({
+            url: '/categories/all',
+            type: 'GET',
+            contentType: 'application/json',
+            beforeSend: function (xhr, settings) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                xhr.setRequestHeader(header, token);
+                $('#cover-spin').show();
+            },
+            success: function (categoryItems) {
+                $('#cover-spin').hide();
+                $.each(categoryItems, function (i, item) {
+                    $('#category').append($('<option>', {
+                        value: item.categoryId,
+                        text : item.categoryName
+                    }));
+                });
+            },
+            error: function (response) {
+                $('#cover-spin').hide();
+
+            }
+        })
+    }
+
+    $("#add_product").click(function () {
+
+        const productName = $("#product_name").val();
+        const productPrice = $("#product_price").val();
+        const productDescription = $("#product_desc").val();
+        const productImage = $("#product_image").val();
+        const category = $("#category").val();
+        const product = {};
+
+
+        product.productName = productName;
+        product.productPrice = productPrice;
+        product.productShortDesc = productDescription;
+        product.productCategoryId = {};
+        product.productImage = productImage;
+        const categoryId = parseInt(category);
+
+
+        $.ajax({
+            url: 'add?categoryId='+categoryId,
+            type: 'POST',
+            contentType: "application/json",
+            beforeSend: function (xhr, settings) {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                xhr.setRequestHeader(header, token);
+                $('#cover-spin').show();
+            },
+            data: JSON.stringify(product),
+            success: function (response) {
+                $('#cover-spin').hide();
+                clearInputFileds();
+            },
+            error: function (response) {
+                $('#cover-spin').hide();
+            }
+
+        });
+    });
+
+
+</script>
+</body>
+</html>

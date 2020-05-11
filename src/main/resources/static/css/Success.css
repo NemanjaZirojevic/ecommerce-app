@@ -1,0 +1,45 @@
+#shoppingCartItem {
+    display: none !important;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    width: 80%;
+    margin-top: 75px;
+
+}
+
+.message-title {
+    font-family: 'Dancing Script', cursive;
+    color: green;
+    font-size: 40px;
+    text-align: center;
+}
+
+.message-body {
+    font-family: 'Dancing Script', cursive;
+    color: green;
+    font-size: 20px;
+    text-align: center;
+}
+
+.message-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.imgwrap {
+    width: 50%;
+    margin: auto;
+}
+.imgwrap img {
+    display: block;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    margin: auto;
+}

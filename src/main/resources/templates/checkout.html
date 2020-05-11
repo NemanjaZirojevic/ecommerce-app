@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Welcome</title>
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Navbar.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Main.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Spinner.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Checkout.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{../css/Form.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+</head>
+<nav th:insert="fragments/navbar :: navbar"></nav>
+<div id="cover-spin"></div>
+<body>
+<div class="container">
+    <div class="checkout">
+        <h2>Order details</h2>
+    </div>
+    <div>
+        <table id="customers">
+            <tr>
+                <th>Image</th>
+                <th>Product name</th>
+                <th>Product price</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+            <tr th:each="product: ${products}">
+                <td style="text-align: center"><img class="img" th:src="${product?.productImage}"></td>
+                <td th:text="${product?.productId}" style="display: none"/>
+                <td th:text="${product?.productName}"/>
+                <td th:text="${product?.productPrice}"/>
+                <td th:text="${product?.productQuantity}"/>
+                <td style="text-align: center">
+                    <button id="btn_remove" class="remove">REMOVE</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Total :</td>
+                <td colspan="4" th:text="${total}" style="text-align: right" id="totalAmount"></td>
+            </tr>
+        </table>
+    </div>
+    <div class="main-block">
+        <div class="checkout">
+            <h2>Contact Form</h2>
+        </div>
+        <form th:object="${orderForm}" th:action="@{checkout}" th:method="post" method="post" id="checkForm">
+            <div class="contact-info">
+                <input type="text" th:name="orderShipAddress" placeholder="Enter address for delivery">
+                <span class="error" th:if="${#fields.hasErrors('orderShipAddress')}" th:errors="*{orderShipAddress}"
+                      style="color: red">Delivery address is required!</span>
+                <input type="text" th:name="orderCity" placeholder="Enter city">
+                <span class="error" th:if="${#fields.hasErrors('orderCity')}" th:errors="*{orderCity}"
+                      style="color: red">City name is required!</span>
+                <input type="text" th:name="orederCountry" placeholder="Enter country">
+                <span class="error" th:if="${#fields.hasErrors('orederCountry')}" th:errors="*{orederCountry}"
+                      style="color: red">Country name is required!</span>
+                <input type="text" th:name="orderZip" placeholder="Enter country zip code">
+                <span class="error" th:if="${#fields.hasErrors('orderZip')}" th:errors="*{orderZip}" style="color: red"> Country zip code is required!</span>
+                <input type="text" th:name="orderAmount" placeholder="Order amount" id="orderAmount"
+                       style="display: none">
+                <input type="text" th:name="orderPhone" placeholder="Your phone">
+                <span class="error" th:if="${#fields.hasErrors('orderPhone')}" th:errors="*{orderPhone}"
+                      style="color: red">Contact phone not in correct format!</span>
+                <input type="text" th:name="orderEmail" placeholder="Your email">
+                <span class="error" th:if="${#fields.hasErrors('orderEmail')}" th:errors="*{orderEmail}"
+                      style="color: red">Wrong order email</span>
+                <input type="hidden" id="productList" name="products">
+                <input id="token" type="hidden" name="token">
+                <input id="cardPayment" type="hidden" name="cardPayment">
+            </div>
+            <h3>Payment Metod</h3>
+            <div class="metod">
+                <div>
+                    <input type="radio" value="none" id="radioDelivery" name="metod" checked/>
+                    <label for="radioDelivery" class="radio">For pick up</label>
+                </div>
+                <div>
+                    <input type="radio" value="none" id="radioCreditCard" name="metod"/>
+                    <label for="radioCreditCard" class="radio">Credit card</label>
+                </div>
+            </div>
+
+            <div action="#" id="payment-form" style="display: none;margin-top: 20px">
+                <input id="api-key" type="hidden" th:value="${stripePublicKey}">
+                <div class="form-group">
+                    <label class="font-weight-medium" for="card-element">
+                        Enter credit or debit card below
+                    </label>
+                    <div class="w-100" id="card-element">
+                        <!-- A Stripe Element will be inserted here. -->
+                    </div>
+                </div>
+                <!-- Used to display Element errors. -->
+                <div class="text-danger w-100" id="card-errors" role="alert"></div>
+                <div class="form-group pt-2">
+                    <div class="small text-muted mt-2">
+                        Pay securely with Stripe. By clicking the button above, you agree
+                        to our <a target="_blank" href="#">Terms of Service</a>,
+                        <a target="_blank" href="#">Privacy</a> and
+                        <a target="_blank" href="#">Refund</a> policies.
+                    </div>
+                </div>
+            </div>
+            <button class="button" type="submit" onclick="submitForm(event)">Submit</button>
+        </form>
+    </div>
+
+
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.5.0.js"
+        integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc="
+        crossorigin="anonymous"></script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var products = /*[[${products}]]*/ 'default';
+
+
+    /*]]>*/
+
+        var API_KEY = $('#api-key').val();
+        // Create a Stripe client.
+        var stripe = Stripe(API_KEY);
+
+        // Create an instance of Elements.
+        var elements = stripe.elements();
+
+        // Create an instance of the card Element.
+        var card = elements.create('card');
+
+        // Add an instance of the card Element into the `card-element` <div>.
+        card.mount('#card-element');
+
+        // Handle real-time validation errors from the card Element.
+        card.addEventListener('change', function (event) {
+            var displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+
+        var form = document.getElementById('checkForm');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            $('#cover-spin').show();
+            const totalAmount = $("#totalAmount").text();
+            $("#orderAmount").val(parseInt(totalAmount));
+            $("#productList").val(JSON.stringify(products));
+            const form = $('#checkForm');
+            if ($('#radioCreditCard').is(':checked')) {
+                stripe.createToken(card)
+                    .then(function (result) {
+                        if (result.error) {
+                            var errorElement = document.getElementById('card-errors');
+                            errorElement.textContent = result.error.message;
+                            $('#cover-spin').hide();
+                        } else {
+                            var token = result.token.id;
+                            console.log(token);
+                            $("#token").val(token);
+                            $("#cardPayment").val(true);
+                            form.submit();
+                        }
+                    });
+            } else {
+                $("#cardPayment").val(false);
+                form.submit();
+            }
+        });
+
+
+
+    $(".remove").click(function () {
+        const productId = $(this).closest('tr').find('td:eq(1)').text();
+        const price = $(this).closest('tr').find('td:eq(3)').text();
+        const quantity = $(this).closest('tr').find('td:eq(4)').text();
+        const lastRow = $("#customers").find("tr").last();
+        const total = parseInt(lastRow.find('td:eq(1)').text());
+        const updatedTotal = total - (parseInt(price) * parseInt(quantity));
+        lastRow.find('td:eq(1)').text(updatedTotal);
+        $(this).parent().parent().remove();
+        const elIndex = getIndexOfElement(productId);
+        products.splice(elIndex, 1);
+    });
+
+    function getIndexOfElement(productId) {
+        $.each(products, function (index, el) {
+            if (el.productId == productId) {
+                return index;
+            }
+        });
+    }
+
+    $("#radioDelivery").on('change', function () {
+        $("#payment-form").css('display', 'none');
+    });
+
+    $("#radioCreditCard").on('change', function () {
+        $("#payment-form").css('display', 'block');
+
+    });
+
+    $(window).on('popstate', function (e) {
+        var state = e.originalEvent.state;
+        if (state !== null) {
+            window.location='/home';
+        }
+    });
+</script>
+</body>
+</html>

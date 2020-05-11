@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<nav th:fragment="navbar" class="navbar">
+    <div class="nav-logo">
+        <img style="max-width: 80px" th:src="@{../../icons/logo.png}">
+    </div>
+    <ul class="navitems">
+        <li> <a th:href="@{/home}" class="active"><i class="fa fa-fw fa-home"></i>Home</a></li>
+        <li style="float: right"><i class="fa fa-fw fa-user"></i><a th:text="${#authentication.getName()}"/></li>
+        <li style="float: right"><a th:href="@{/logout}">Logout</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/products/display}" >Products Administration</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/users}" >Users Administration</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/categories/display}" >Categories Administration</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/orders}" >Orders Administration</a></li>
+        <li style="float:right;" id="shoppingCartItem"><span>Total items : <input th:id="shoppingCard" th:value="0"></span> <div class="some"><img th:id="cardPreview" th:src="@{icons/shopping-cart.png}"/></div></li>
+        <input id="total" type="hidden" value="0" class="target">
+    </ul>
+    <div class="shopping-cart" th:id="shoppingCardItems">
+        <span class="shopping-cart-close">&times;</span>
+    </div>
+</nav>
+</html>
